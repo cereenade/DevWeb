@@ -84,13 +84,23 @@ function rendre() {
 
 function rendreOnglets() {
   const chemin = cheminActuel();
+
   barreOnglets.innerHTML = ONGLETS.map((o) => {
-    const actif = chemin === o.chemin || (o.chemin === '/documents' && chemin.startsWith('/document'));
-    return `<a href="#${o.chemin}" class="${o.principal ? 'onglet-analyser' : ''}" ${actif ? 'aria-current="page"' : ''}>
-      ${icone(o.icone, { taille: 22 })}${o.nom}
-    </a>`;
+    const actif =
+      chemin === o.chemin ||
+      (o.chemin === '/documents' && chemin.startsWith('/document'));
+
+    return `
+      <a href="#${o.chemin}"
+         class="${actif ? 'onglet-actif' : ''}"
+         ${actif ? 'aria-current="page"' : ''}>
+        ${icone(o.icone, { taille: 22 })}
+        ${o.nom}
+      </a>
+    `;
   }).join('');
 }
+
 
 function appliquerPreferences() {
   const etat = lire();

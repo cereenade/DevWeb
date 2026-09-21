@@ -45,6 +45,10 @@
 
 * { box-sizing: border-box; }
 
+[hidden] {
+    display: none !important;
+}
+
 html { -webkit-text-size-adjust: 100%; }
 
 body {
@@ -672,8 +676,8 @@ body.lecture-facile .etape { line-height: 1.75; }
 }
 
 @media (min-width: 1024px) {
-  body.avec-onglets { padding-left: 268px; }
-  body.avec-onglets .ecran { padding-bottom: 48px; }
+body.avec-onglets { padding-left: 268px; }
+body.avec-onglets .ecran { padding-bottom: 48px; }
   .barre-onglets {
     top: 0; right: auto; bottom: 0;
     width: 268px;
