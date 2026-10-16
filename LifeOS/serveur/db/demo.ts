@@ -1,7 +1,9 @@
-/* Copie les documents et notifications de démonstration dans le compte d'une personne. */
+/* Copie les documents et notifications de démonstration dans le compte d'une personne,
+   datés à partir du jour de l'opération (voir lib/demoDates.ts). */
 
 import { and, eq } from 'drizzle-orm';
-import { DOCUMENTS_DEMO, NOTIFICATIONS_DEMO } from '@/lib/demo';
+import { DOCUMENTS_DEMO } from '@/lib/demo';
+import { documentDemoDate, documentsDemoDates, notificationsDemoDatees } from '@/lib/demoDates';
 import type { ModeleDocument } from '@/lib/data';
 import { db } from './index';
 import { documents, notifications } from './schema';
@@ -18,8 +20,8 @@ function ligneDocument(utilisateurId: string, modele: ModeleDocument) {
 }
 
 export async function creerContenuDemo(utilisateurId: string) {
-  await db.insert(documents).values(DOCUMENTS_DEMO.map((m) => ligneDocument(utilisateurId, m)));
-  await db.insert(notifications).values(NOTIFICATIONS_DEMO.map((n) => ({
+  await db.insert(documents).values(documentsDemoDates().map((m) => ligneDocument(utilisateurId, m)));
+  await db.insert(notifications).values(notificationsDemoDatees().map((n) => ({
     utilisateurId,
     titre: n.titre,
     texte: n.texte,
@@ -38,5 +40,5 @@ export async function ajouterDocumentDemo(utilisateurId: string, slug: string) {
     where: and(eq(documents.utilisateurId, utilisateurId), eq(documents.slug, slug)),
     columns: { id: true }
   });
-  if (!existant) await db.insert(documents).values(ligneDocument(utilisateurId, modele));
+  if (!existant) await db.insert(documents).values(ligneDocument(utilisateurId, documentDemoDate(modele)));
 }

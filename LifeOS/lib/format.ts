@@ -9,14 +9,14 @@ const MOIS_COURT = ['JANV.', 'FÉVR.', 'MARS', 'AVR.', 'MAI', 'JUIN', 'JUIL.',
 export function dateLongue(iso: string | null): string {
   if (!iso) return '';
   const [a, m, j] = iso.split('-').map(Number);
-  return `${j} ${MOIS[m - 1]} ${a}`;
+  return `${j === 1 ? '1er' : j} ${MOIS[m - 1]} ${a}`;
 }
 
 /** « 2026-09-28 » → « 28 septembre » */
 export function dateCourte(iso: string | null): string {
   if (!iso) return '';
   const [, m, j] = iso.split('-').map(Number);
-  return `${j} ${MOIS[m - 1]}`;
+  return `${j === 1 ? '1er' : j} ${MOIS[m - 1]}`;
 }
 
 export function jourEtMois(iso: string) {
