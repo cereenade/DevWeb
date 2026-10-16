@@ -10,7 +10,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrer.ts",
     "db:seed": "tsx scripts/compte-demo.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:demo-a-jour": "tsx scripts/demo-a-jour.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

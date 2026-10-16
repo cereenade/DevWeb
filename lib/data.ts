@@ -55,6 +55,8 @@ export interface ModeleNotification {
   titre: string;
   texte: string;
   joursAvant: number;
+  /** Document dont la date limite remplace {dateCourte} dans le texte. */
+  document?: string;
   ton: CleStatut;
   lien: string;
   action: string;

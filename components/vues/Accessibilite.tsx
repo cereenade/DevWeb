@@ -4,13 +4,14 @@ import Link from 'next/link';
 import { Icone } from '@/components/Icone';
 import { BadgeStatut, EnteteEcran } from '@/components/ui';
 import { DOCUMENTS_DEMO } from '@/lib/demo';
-import { dateLongue } from '@/lib/format';
+import { documentDemoDate } from '@/lib/demoDates';
+import { dateCourte, dateLongue } from '@/lib/format';
 import { choisirTailleTexte, definirLectureFacile } from '@/serveur/actions/preferences';
 
 const TAILLES: [number, string, string][] = [[1, 'Normal', '.95rem'], [1.15, 'Grand', '1.08rem'], [1.32, 'Très grand', '1.2rem']];
 
 export function Accessibilite({ lectureFacile, tailleTexte }: { lectureFacile: boolean; tailleTexte: number }) {
-  const exemple = DOCUMENTS_DEMO[0];
+  const exemple = documentDemoDate(DOCUMENTS_DEMO[0]);
   const apercu = lectureFacile ? exemple.enClairFacile : exemple.enClair.fr;
 
   return (
@@ -42,7 +43,7 @@ export function Accessibilite({ lectureFacile, tailleTexte }: { lectureFacile: b
           <BadgeStatut cle="action" />
           <span className="carte-titre">{exemple.organisme}</span>
           <p>{apercu}</p>
-          <p style={{ fontWeight: 700, color: '#A4382D' }}>{lectureFacile ? 'À faire avant le 28 septembre.' : 'Date limite : ' + dateLongue(exemple.echeance)}</p>
+          <p style={{ fontWeight: 700, color: '#A4382D' }}>{lectureFacile ? `À faire avant le ${dateCourte(exemple.echeance)}.` : 'Date limite : ' + dateLongue(exemple.echeance)}</p>
         </div>
 
         <div className="carte">

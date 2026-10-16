@@ -5,11 +5,12 @@ import { Icone } from '@/components/Icone';
 import { EnteteEcran } from '@/components/ui';
 import { LANGUES } from '@/lib/data';
 import { DOCUMENTS_DEMO } from '@/lib/demo';
+import { documentDemoDate } from '@/lib/demoDates';
 import { choisirLangue } from '@/serveur/actions/preferences';
 
 export function Langue({ langue }: { langue: string }) {
   const choisie = LANGUES.find((l) => l.code === langue) || LANGUES[0];
-  const exemple = DOCUMENTS_DEMO[0];
+  const exemple = documentDemoDate(DOCUMENTS_DEMO[0]);
   const apercu = exemple.enClair[choisie.code] || exemple.enClair.fr;
 
   return (
