@@ -42,15 +42,15 @@ donc une base [Turso](https://turso.tech) (offre gratuite) convient sans changer
 
 1. **Root Directory** : dans le projet Vercel, *Settings → Build and Deployment → Root Directory*,
    indiquer `LifeOS` (le dossier qui contient `package.json`). Sans cela : erreur `NEXT_NO_VERSION`.
-2. **Base Turso** : créer une base, puis récupérer son URL (`libsql://…`) et un jeton d'accès.
-3. **Variables d'environnement** du projet Vercel :
-   - `DATABASE_URL` = l'URL `libsql://…`
-   - `DATABASE_AUTH_TOKEN` = le jeton
-   - `ENABLE_EXPERIMENTAL_COREPACK` = `1` (pour que Vercel utilise la version de pnpm du projet)
-4. Redéployer. Les tables sont créées au premier démarrage ; pour le compte de démo :
-   `DATABASE_URL=… DATABASE_AUTH_TOKEN=… pnpm db:seed` depuis votre machine.
+2. **Base Turso** : dans le projet Vercel, onglet *Storage* → *Create Database* → **Turso**, puis
+   la connecter au projet (tous les environnements). Vercel ajoute alors `TURSO_DATABASE_URL` et
+   `TURSO_AUTH_TOKEN`, que LifeOS lit directement. (Autre possibilité : une base créée sur turso.tech,
+   avec `DATABASE_URL` et `DATABASE_AUTH_TOKEN` saisies à la main.)
+3. Redéployer. Les tables sont créées au premier démarrage. Pour créer le compte de démo en ligne :
+   `vercel env pull .env.production.local --environment production`, puis lancer `pnpm db:seed`
+   avec ces variables chargées.
 
-`pnpm db:studio` fonctionne aussi sur la base Turso avec ces deux variables.
+`pnpm db:studio` fonctionne aussi sur la base Turso avec ces variables.
 
 ## Organisation
 
