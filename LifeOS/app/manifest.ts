@@ -1,0 +1,42 @@
+import type { MetadataRoute } from 'next';
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: 'LifeOS — Vos papiers. En clair.',
+    short_name: 'LifeOS',
+    description: "LifeOS explique vos documents administratifs français : ce qu'ils signifient, ce que vous devez faire et avant quelle date.",
+    lang: 'fr',
+    dir: 'ltr',
+    start_url: '/',
+    scope: '/',
+    id: '/lifeos/',
+    display: 'standalone',
+    display_override: ['standalone', 'minimal-ui'],
+    orientation: 'portrait-primary',
+    background_color: '#FBFAF7',
+    theme_color: '#FBFAF7',
+    categories: ['productivity', 'utilities'],
+    icons: [
+      { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: '/icons/icon-maskable-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+      { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+    ],
+    shortcuts: [
+      {
+        name: 'Analyser un document',
+        short_name: 'Analyser',
+        description: 'Photographier ou importer un courrier administratif',
+        url: '/analyser',
+        icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }]
+      },
+      {
+        name: 'Mes échéances',
+        short_name: 'Échéances',
+        description: 'Voir les dates limites de vos démarches',
+        url: '/echeances',
+        icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }]
+      }
+    ]
+  };
+}
