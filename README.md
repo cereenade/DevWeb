@@ -1,36 +1,22 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LifeOS — Vos papiers. En clair.
 
-## Getting Started
+Application Next.js (App Router) qui explique les documents administratifs français.
+Version de démonstration : les documents sont des exemples et l'état est conservé dans le navigateur (localStorage).
 
-First, run the development server:
+## Lancer
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev        # http://localhost:3000
+pnpm build && pnpm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Le service worker (`public/sw.js`, mode hors connexion) n'est enregistré qu'en production.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Organisation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/` — les routes. `(public)` : accueil, connexion, onboarding ; `(app)` : écrans connectés avec la barre d'onglets ; `(plein-ecran)` : écran d'analyse.
+- `components/vues/` — un composant par écran.
+- `components/` — icônes, petits composants partagés, garde de connexion, démarrage (préférences, hors connexion, PWA).
+- `lib/data.ts` — données de démonstration ; `lib/store.ts` — état local ; `lib/format.ts` — dates ; `lib/navigateur.ts` — notifications, installation, export.
+- `app/manifest.ts` — manifeste PWA (servi à `/manifest.webmanifest`).
