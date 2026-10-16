@@ -35,6 +35,23 @@ avec lecture et modification. Le fichier `data/lifeos.db` s'ouvre aussi avec n'i
 
 Pour utiliser un autre fichier, définir `DATABASE_URL` (par exemple `file:data/autre.db`).
 
+## Déployer sur Vercel
+
+Le disque de Vercel est en lecture seule : la base doit être hébergée. LifeOS utilise libSQL,
+donc une base [Turso](https://turso.tech) (offre gratuite) convient sans changer le code.
+
+1. **Root Directory** : dans le projet Vercel, *Settings → Build and Deployment → Root Directory*,
+   indiquer `LifeOS` (le dossier qui contient `package.json`). Sans cela : erreur `NEXT_NO_VERSION`.
+2. **Base Turso** : créer une base, puis récupérer son URL (`libsql://…`) et un jeton d'accès.
+3. **Variables d'environnement** du projet Vercel :
+   - `DATABASE_URL` = l'URL `libsql://…`
+   - `DATABASE_AUTH_TOKEN` = le jeton
+   - `ENABLE_EXPERIMENTAL_COREPACK` = `1` (pour que Vercel utilise la version de pnpm du projet)
+4. Redéployer. Les tables sont créées au premier démarrage ; pour le compte de démo :
+   `DATABASE_URL=… DATABASE_AUTH_TOKEN=… pnpm db:seed` depuis votre machine.
+
+`pnpm db:studio` fonctionne aussi sur la base Turso avec ces deux variables.
+
 ## Organisation
 
 - `app/` — les routes. `(public)` : connexion ; `(app)` : écrans connectés avec la barre d'onglets ;
