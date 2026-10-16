@@ -1,9 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Icone, Logo, type NomIcone } from '@/components/Icone';
-import { ecrire } from '@/lib/store';
+import { terminerOnboarding } from '@/serveur/actions/preferences';
 
 const PAGES: { titre: string; texte: string; icone: NomIcone; fond: string; couleur: string }[] = [
   { titre: 'Photographiez vos documents', texte: 'LifeOS vous explique ce qu’ils signifient et ce que vous devez faire.', icone: 'photo', fond: 'var(--lavande-clair)', couleur: '#4737A0' },
@@ -14,12 +14,15 @@ const PAGES: { titre: string; texte: string; icone: NomIcone; fond: string; coul
 export function Onboarding() {
   const router = useRouter();
   const [index, setIndex] = useState(0);
+  const [, demarrer] = useTransition();
   const page = PAGES[index];
   const derniere = index === PAGES.length - 1;
 
   function terminer() {
-    ecrire({ onboardingVu: true });
-    router.push('/tableau-de-bord');
+    demarrer(async () => {
+      await terminerOnboarding();
+      router.push('/tableau-de-bord');
+    });
   }
 
   return (

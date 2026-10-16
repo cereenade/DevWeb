@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { Icone } from '@/components/Icone';
 import { EnteteEcran } from '@/components/ui';
-import { DOCUMENTS, LANGUES } from '@/lib/data';
-import { ecrire, useEtatCharge } from '@/lib/store';
+import { LANGUES } from '@/lib/data';
+import { DOCUMENTS_DEMO } from '@/lib/demo';
+import { choisirLangue } from '@/serveur/actions/preferences';
 
-export function Langue() {
-  const etat = useEtatCharge();
-  const choisie = LANGUES.find((l) => l.code === etat.langue) || LANGUES[0];
-  const exemple = DOCUMENTS[0];
+export function Langue({ langue }: { langue: string }) {
+  const choisie = LANGUES.find((l) => l.code === langue) || LANGUES[0];
+  const exemple = DOCUMENTS_DEMO[0];
   const apercu = exemple.enClair[choisie.code] || exemple.enClair.fr;
 
   return (
@@ -22,7 +22,7 @@ export function Langue() {
           {LANGUES.map((l) => {
             const active = l.code === choisie.code;
             return (
-              <button key={l.code} type="button" aria-pressed={active} onClick={() => ecrire({ langue: l.code })}
+              <button key={l.code} type="button" aria-pressed={active} onClick={() => choisirLangue(l.code)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, minHeight: 64, padding: '13px 15px', borderRadius: 16, textAlign: 'left',
                   background: active ? 'var(--lavande)' : '#fff', color: active ? '#fff' : 'var(--anthracite)', border: `1.5px solid ${active ? 'var(--lavande)' : 'var(--bordure-forte)'}`

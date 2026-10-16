@@ -2,40 +2,51 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Icone } from '@/components/Icone';
 import { BadgeStatut, CarteLien, EnteteEcran } from '@/components/ui';
 import { LANGUES, STATUTS, type DocumentAdmin } from '@/lib/data';
 import { dateLongue, delaiEnMots, jaugeEcheance } from '@/lib/format';
-import { basculerRappels, demarcheTerminee, etapesDe, progression, useEtatCharge } from '@/lib/store';
+import { demarcheTerminee, nombreEtapesFaites, progression } from '@/lib/demarches';
+import { basculerRappels, supprimerDocument } from '@/serveur/actions/documents';
 import { annoncer, demanderNotifications } from '@/lib/navigateur';
 
-export function Document({ doc }: { doc: DocumentAdmin }) {
-  const etat = useEtatCharge();
+interface Proprietes {
+  doc: DocumentAdmin;
+  langueChoisie: string;
+  lectureFacile: boolean;
+}
+
+export function Document({ doc, langueChoisie, lectureFacile }: Proprietes) {
   const router = useRouter();
   const [explication, setExplication] = useState(false);
+  const [enCours, demarrer] = useTransition();
 
   const s = STATUTS[doc.statut];
-  const langue = LANGUES.find((l) => l.code === etat.langue) || LANGUES[0];
+  const langue = LANGUES.find((l) => l.code === langueChoisie) || LANGUES[0];
   const traduction = doc.enClair[langue.code];
-  const enClair = etat.lectureFacile && langue.code === 'fr'
+  const enClair = lectureFacile && langue.code === 'fr'
     ? doc.enClairFacile
     : (traduction || doc.enClair.fr);
-  const rappels = Boolean(etat.rappels[doc.id]);
-  const terminee = demarcheTerminee(etat, doc);
-  const part = progression(etat, doc);
-  const faites = etapesDe(etat, doc).filter(Boolean).length;
+  const rappels = doc.rappels;
+  const terminee = demarcheTerminee(doc);
+  const part = progression(doc);
+  const faites = nombreEtapesFaites(doc);
 
   function basculer() {
-    const actif = basculerRappels(doc.id);
-    annoncer(actif ? 'Rappels activés.' : 'Rappels désactivés.');
-    if (actif) demanderNotifications();
+    demarrer(async () => {
+      const actif = await basculerRappels(doc.slug);
+      annoncer(actif ? 'Rappels activés.' : 'Rappels désactivés.');
+      if (actif) demanderNotifications();
+    });
   }
 
   function supprimer() {
-    if (confirm('Supprimer ce document et la démarche associée ? Cette action est définitive.')) {
+    if (!confirm('Supprimer ce document et la démarche associée ? Cette action est définitive.')) return;
+    demarrer(async () => {
+      await supprimerDocument(doc.slug);
       router.push('/documents');
-    }
+    });
   }
 
   return (
@@ -81,7 +92,7 @@ export function Document({ doc }: { doc: DocumentAdmin }) {
               <span style={{ fontSize: '.88rem', fontWeight: 800, color: s.texte }}>{delaiEnMots(doc.echeance)}</span>
             </div>
             <button type="button" className={`bouton ${rappels ? 'bouton--secondaire' : 'bouton--sombre'} bouton--bloc`}
-              onClick={basculer} aria-pressed={rappels}>
+              onClick={basculer} aria-pressed={rappels} disabled={enCours}>
               <Icone nom="cloche" taille={20} couleur={rappels ? '#1E5E3E' : '#fff'} />{rappels ? 'Rappels activés' : 'Activer les rappels'}
             </button>
             {rappels && (
@@ -111,7 +122,7 @@ export function Document({ doc }: { doc: DocumentAdmin }) {
         </div>
 
         {doc.etapes.length > 0 && (
-          <Link className="carte" href={`/document/${doc.id}/etapes`}>
+          <Link className="carte" href={`/document/${doc.slug}/etapes`}>
             <div className="rangee">
               <span className="vignette" style={{ background: 'var(--lavande-clair)', color: 'var(--lavande-fonce)' }}><Icone nom="demarches" taille={20} couleur="#5A48B8" /></span>
               <span style={{ display: 'flex', flexDirection: 'column', gap: 2, flexGrow: 1 }}>
@@ -124,15 +135,15 @@ export function Document({ doc }: { doc: DocumentAdmin }) {
           </Link>
         )}
 
-        <CarteLien href={`/document/${doc.id}/assistant`} icone="discussion">Une question sur ce document ?</CarteLien>
+        <CarteLien href={`/document/${doc.slug}/assistant`} icone="discussion">Une question sur ce document ?</CarteLien>
 
         <div className="rangee" style={{ gap: 10 }}>
           <button type="button" className="bouton bouton--secondaire" style={{ flexGrow: 1, minHeight: 52 }}><Icone nom="telecharger" taille={19} />Télécharger</button>
-          <button type="button" className="bouton bouton--danger" style={{ flexGrow: 1, minHeight: 52 }} onClick={supprimer}><Icone nom="corbeille" taille={19} couleur="#9C362B" />Supprimer</button>
+          <button type="button" className="bouton bouton--danger" style={{ flexGrow: 1, minHeight: 52 }} onClick={supprimer} disabled={enCours}><Icone nom="corbeille" taille={19} couleur="#9C362B" />Supprimer</button>
         </div>
 
         {doc.etapes.length > 0 && (
-          <Link className="bouton bouton--bloc" href={`/document/${doc.id}/etapes`}>Ce que je dois faire <Icone nom="suivant" taille={20} couleur="#fff" /></Link>
+          <Link className="bouton bouton--bloc" href={`/document/${doc.slug}/etapes`}>Ce que je dois faire <Icone nom="suivant" taille={20} couleur="#fff" /></Link>
         )}
 
         <p className="note-bas">Reçu le {dateLongue(doc.recuLe)} · Exemple de démonstration</p>

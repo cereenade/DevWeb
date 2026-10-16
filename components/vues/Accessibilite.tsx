@@ -3,16 +3,15 @@
 import Link from 'next/link';
 import { Icone } from '@/components/Icone';
 import { BadgeStatut, EnteteEcran } from '@/components/ui';
-import { DOCUMENTS } from '@/lib/data';
+import { DOCUMENTS_DEMO } from '@/lib/demo';
 import { dateLongue } from '@/lib/format';
-import { ecrire, useEtatCharge } from '@/lib/store';
+import { choisirTailleTexte, definirLectureFacile } from '@/serveur/actions/preferences';
 
 const TAILLES: [number, string, string][] = [[1, 'Normal', '.95rem'], [1.15, 'Grand', '1.08rem'], [1.32, 'Très grand', '1.2rem']];
 
-export function Accessibilite() {
-  const etat = useEtatCharge();
-  const exemple = DOCUMENTS[0];
-  const apercu = etat.lectureFacile ? exemple.enClairFacile : exemple.enClair.fr;
+export function Accessibilite({ lectureFacile, tailleTexte }: { lectureFacile: boolean; tailleTexte: number }) {
+  const exemple = DOCUMENTS_DEMO[0];
+  const apercu = lectureFacile ? exemple.enClairFacile : exemple.enClair.fr;
 
   return (
     <>
@@ -24,8 +23,8 @@ export function Accessibilite() {
             <strong>Mode lecture facile</strong>
             <span className="carte-detail">Texte plus grand et explications encore plus simples.</span>
           </span>
-          <button type="button" className="interrupteur" role="switch" aria-checked={etat.lectureFacile}
-            aria-label="Mode lecture facile" onClick={() => ecrire({ lectureFacile: !etat.lectureFacile })}><span /></button>
+          <button type="button" className="interrupteur" role="switch" aria-checked={lectureFacile}
+            aria-label="Mode lecture facile" onClick={() => definirLectureFacile(!lectureFacile)}><span /></button>
         </div>
 
         <div className="carte">
@@ -33,7 +32,7 @@ export function Accessibilite() {
           <div className="rangee" style={{ gap: 8 }}>
             {TAILLES.map(([v, nom, taille]) => (
               <button key={v} type="button" className="puce" style={{ flexGrow: 1, justifyContent: 'center', fontSize: taille }}
-                aria-pressed={etat.tailleTexte === v} onClick={() => ecrire({ tailleTexte: v })}>{nom}</button>
+                aria-pressed={tailleTexte === v} onClick={() => choisirTailleTexte(v)}>{nom}</button>
             ))}
           </div>
         </div>
@@ -43,7 +42,7 @@ export function Accessibilite() {
           <BadgeStatut cle="action" />
           <span className="carte-titre">{exemple.organisme}</span>
           <p>{apercu}</p>
-          <p style={{ fontWeight: 700, color: '#A4382D' }}>{etat.lectureFacile ? 'À faire avant le 28 septembre.' : 'Date limite : ' + dateLongue(exemple.echeance)}</p>
+          <p style={{ fontWeight: 700, color: '#A4382D' }}>{lectureFacile ? 'À faire avant le 28 septembre.' : 'Date limite : ' + dateLongue(exemple.echeance)}</p>
         </div>
 
         <div className="carte">

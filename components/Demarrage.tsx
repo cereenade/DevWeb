@@ -1,10 +1,9 @@
 'use client';
 
-/* Ce qui tourne en permanence, quel que soit l'écran : préférences de lecture,
-   bandeau hors connexion, invitation d'installation et service worker. */
+/* Ce qui tourne en permanence, quel que soit l'écran : bandeau hors connexion,
+   invitation d'installation et service worker. */
 
 import { useEffect, useSyncExternalStore } from 'react';
-import { useEtat } from '@/lib/store';
 import { ecouterInstallation } from '@/lib/navigateur';
 
 function abonnerReseau(fn: () => void) {
@@ -17,15 +16,7 @@ function abonnerReseau(fn: () => void) {
 }
 
 export function Demarrage() {
-  const etat = useEtat();
   const enLigne = useSyncExternalStore(abonnerReseau, () => navigator.onLine, () => true);
-
-  /* Mode lecture facile et taille du texte. */
-  useEffect(() => {
-    if (!etat) return;
-    document.body.classList.toggle('lecture-facile', etat.lectureFacile);
-    document.documentElement.style.setProperty('--echelle', String(etat.tailleTexte || 1));
-  }, [etat]);
 
   useEffect(() => ecouterInstallation(), []);
 

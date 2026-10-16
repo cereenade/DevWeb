@@ -36,7 +36,7 @@ export function CarteDocument({ doc, part }: { doc: DocumentAdmin; part?: number
   const s = STATUTS[doc.statut];
   const delai = doc.echeance ? delaiEnMots(doc.echeance) : '';
   return (
-    <Link className="carte" href={`/document/${doc.id}`}>
+    <Link className="carte" href={`/document/${doc.slug}`}>
       <div className="rangee-entre">
         <BadgeStatut cle={doc.statut} />
         {delai && <span style={{ fontSize: '.82rem', fontWeight: 700, color: s.texte }}>{delai}</span>}

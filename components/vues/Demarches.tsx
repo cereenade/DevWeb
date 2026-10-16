@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { Icone } from '@/components/Icone';
 import { CarteDocument } from '@/components/ui';
-import { DOCUMENTS } from '@/lib/data';
-import { demarcheTerminee, progression, useEtatCharge } from '@/lib/store';
+import type { DocumentAdmin } from '@/lib/data';
+import { demarcheTerminee, progression } from '@/lib/demarches';
 
 type Onglet = 'afaire' | 'encours' | 'terminees';
 
@@ -16,15 +16,14 @@ const VIDES: Record<Onglet, string> = {
   terminees: 'Vos démarches terminées apparaîtront ici.'
 };
 
-export function Demarches() {
-  const etat = useEtatCharge();
+export function Demarches({ documents }: { documents: DocumentAdmin[] }) {
   const [onglet, setOnglet] = useState<Onglet>('afaire');
 
-  const avecEtapes = DOCUMENTS.filter((d) => d.etapes.length || d.echeance);
-  const listes: Record<Onglet, typeof DOCUMENTS> = {
-    afaire: avecEtapes.filter((d) => !demarcheTerminee(etat, d) && progression(etat, d) === 0),
-    encours: avecEtapes.filter((d) => !demarcheTerminee(etat, d) && progression(etat, d) > 0),
-    terminees: DOCUMENTS.filter((d) => demarcheTerminee(etat, d))
+  const avecEtapes = documents.filter((d) => d.etapes.length || d.echeance);
+  const listes: Record<Onglet, DocumentAdmin[]> = {
+    afaire: avecEtapes.filter((d) => !demarcheTerminee(d) && progression(d) === 0),
+    encours: avecEtapes.filter((d) => !demarcheTerminee(d) && progression(d) > 0),
+    terminees: documents.filter((d) => demarcheTerminee(d))
   };
   const liste = listes[onglet];
 
@@ -38,7 +37,7 @@ export function Demarches() {
       </div>
       <div className="pile-s">
         {liste.length
-          ? liste.map((d) => <CarteDocument key={d.id} doc={d} part={progression(etat, d)} />)
+          ? liste.map((d) => <CarteDocument key={d.slug} doc={d} part={progression(d)} />)
           : (
             <div className="carte" style={{ alignItems: 'center', textAlign: 'center', padding: 30, borderStyle: 'dashed' }}>
               <Icone nom="fichier" taille={36} couleur="#C9C3B8" epaisseur={1.8} />

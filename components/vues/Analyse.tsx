@@ -1,17 +1,21 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Icone } from '@/components/Icone';
 import { ETAPES_ANALYSE } from '@/lib/data';
 import { annoncer } from '@/lib/navigateur';
-
-const CIBLE = '/document/france-travail-actualisation';
+import { analyserDocument } from '@/serveur/actions/documents';
 
 export function Analyse() {
   const router = useRouter();
   const [remplie, setRemplie] = useState(false);
+
+  /* Analyse simulée : le courrier d'exemple est ajouté au compte, puis on affiche le résultat. */
+  const voirResultat = useCallback(async () => {
+    const slug = await analyserDocument();
+    router.push(`/document/${slug}`);
+  }, [router]);
 
   useEffect(() => {
     /* Laisse le navigateur peindre la jauge vide avant de lancer la transition. */
@@ -19,14 +23,14 @@ export function Analyse() {
     annoncer('Analyse du document en cours.');
     const minuterie = setTimeout(() => {
       annoncer('Analyse terminée.');
-      router.push(CIBLE);
+      voirResultat();
     }, 5600);
     return () => {
       cancelAnimationFrame(image);
       clearTimeout(minuterie);
       setRemplie(false);
     };
-  }, [router]);
+  }, [voirResultat]);
 
   return (
     <>
@@ -56,7 +60,7 @@ export function Analyse() {
       </ul>
 
       <div style={{ marginTop: 26 }}>
-        <Link className="bouton bouton--bloc" href={CIBLE}>Voir le résultat <Icone nom="suivant" taille={20} couleur="#fff" /></Link>
+        <button type="button" className="bouton bouton--bloc" onClick={voirResultat}>Voir le résultat <Icone nom="suivant" taille={20} couleur="#fff" /></button>
       </div>
     </>
   );

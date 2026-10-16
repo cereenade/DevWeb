@@ -1,30 +1,36 @@
 'use client';
 
 import Link from 'next/link';
+import { useOptimistic, useTransition } from 'react';
 import { Icone } from '@/components/Icone';
 import { CarteLien, EnteteEcran } from '@/components/ui';
 import type { DocumentAdmin } from '@/lib/data';
 import { dateLongue } from '@/lib/format';
-import { basculerEtape, etapesDe, useEtatCharge } from '@/lib/store';
+import { basculerEtape } from '@/serveur/actions/documents';
 import { annoncer, notifierLocalement } from '@/lib/navigateur';
 
 export function Etapes({ doc }: { doc: DocumentAdmin }) {
-  const etat = useEtatCharge();
-  const faites = etapesDe(etat, doc);
+  /* La case se coche tout de suite ; la base suit en arrière-plan. */
+  const [faites, cocher] = useOptimistic(doc.etapesFaites, (liste: boolean[], index: number) =>
+    liste.map((f, i) => (i === index ? !f : f)));
+  const [, demarrer] = useTransition();
   const nb = faites.filter(Boolean).length;
   const terminee = nb === doc.etapes.length;
 
   function basculer(index: number) {
-    const liste = basculerEtape(doc.id, index, doc.etapes.length);
-    if (liste.every(Boolean)) {
-      annoncer('Démarche terminée. LifeOS ne vous enverra plus de rappel pour cette échéance.');
-      notifierLocalement('Démarche terminée', `${doc.demarche} : c'est fait.`);
-    }
+    demarrer(async () => {
+      cocher(index);
+      const liste = await basculerEtape(doc.slug, index);
+      if (liste.length && liste.every(Boolean)) {
+        annoncer('Démarche terminée. LifeOS ne vous enverra plus de rappel pour cette échéance.');
+        notifierLocalement('Démarche terminée', `${doc.demarche} : c'est fait.`);
+      }
+    });
   }
 
   return (
     <>
-      <EnteteEcran titre="Ce que vous devez faire" retour={`/document/${doc.id}`} />
+      <EnteteEcran titre="Ce que vous devez faire" retour={`/document/${doc.slug}`} />
       <div className="pile">
         <div className="carte">
           <div>
@@ -67,7 +73,7 @@ export function Etapes({ doc }: { doc: DocumentAdmin }) {
           </div>
         )}
 
-        <CarteLien href={`/document/${doc.id}/assistant`} icone="discussion">Une étape n&apos;est pas claire ?</CarteLien>
+        <CarteLien href={`/document/${doc.slug}/assistant`} icone="discussion">Une étape n&apos;est pas claire ?</CarteLien>
 
         <Link className="bouton bouton--secondaire bouton--bloc" href="/echeances"><Icone nom="calendrier" taille={20} />Voir mes échéances</Link>
       </div>

@@ -4,17 +4,16 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Icone } from '@/components/Icone';
 import { BadgeStatut } from '@/components/ui';
-import { CATEGORIES, DOCUMENTS } from '@/lib/data';
+import { CATEGORIES, type DocumentAdmin } from '@/lib/data';
 import { dateCourte, dateLongue } from '@/lib/format';
-import { demarcheTerminee, useEtatCharge } from '@/lib/store';
+import { demarcheTerminee } from '@/lib/demarches';
 
-export function Documents() {
-  const etat = useEtatCharge();
+export function Documents({ documents }: { documents: DocumentAdmin[] }) {
   const [categorie, setCategorie] = useState('Tous');
   const [recherche, setRecherche] = useState('');
 
   const terme = recherche.toLowerCase();
-  let liste = categorie === 'Tous' ? DOCUMENTS : DOCUMENTS.filter((d) => d.categorie === categorie);
+  let liste = categorie === 'Tous' ? documents : documents.filter((d) => d.categorie === categorie);
   if (terme) {
     liste = liste.filter((d) => (d.organisme + ' ' + d.objet + ' ' + d.demarche).toLowerCase().includes(terme));
   }
@@ -38,10 +37,10 @@ export function Documents() {
 
       <ul className="pile-s">
         {liste.length ? liste.map((d) => {
-          const cle = demarcheTerminee(etat, d) ? 'termine' : d.statut;
+          const cle = demarcheTerminee(d) ? 'termine' : d.statut;
           return (
-            <li key={d.id}>
-              <Link className="carte" href={`/document/${d.id}`} style={{ flexDirection: 'row', gap: 14 }}>
+            <li key={d.slug}>
+              <Link className="carte" href={`/document/${d.slug}`} style={{ flexDirection: 'row', gap: 14 }}>
                 <span className="vignette vignette--haute" style={{ background: d.teinte.fond, color: d.teinte.texte }}>{d.initiales}</span>
                 <span style={{ display: 'flex', flexDirection: 'column', gap: 6, flexGrow: 1 }}>
                   <span className="carte-titre" style={{ fontSize: '1.05rem' }}>{d.organisme}</span>

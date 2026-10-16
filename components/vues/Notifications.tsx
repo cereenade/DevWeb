@@ -3,16 +3,20 @@
 import Link from 'next/link';
 import { Icone } from '@/components/Icone';
 import { EnteteEcran } from '@/components/ui';
-import { NOTIFICATIONS, STATUTS } from '@/lib/data';
-import { ecrire, useEtatCharge } from '@/lib/store';
+import { useTransition } from 'react';
+import { STATUTS, type NotificationLifeOS } from '@/lib/data';
+import { ilYA } from '@/lib/format';
+import { toutMarquerLu } from '@/serveur/actions/documents';
 import { annoncer, demanderNotifications } from '@/lib/navigateur';
 
-export function Notifications() {
-  const etat = useEtatCharge();
+export function Notifications({ notifications }: { notifications: NotificationLifeOS[] }) {
+  const [enCours, demarrer] = useTransition();
 
   function toutLu() {
-    ecrire({ notificationsLues: NOTIFICATIONS.map((n) => n.id) });
-    annoncer('Toutes les notifications sont marquées comme lues.');
+    demarrer(async () => {
+      await toutMarquerLu();
+      annoncer('Toutes les notifications sont marquées comme lues.');
+    });
   }
 
   return (
@@ -22,16 +26,21 @@ export function Notifications() {
       </EnteteEcran>
 
       <div className="pile">
-        {NOTIFICATIONS.map((n) => {
+        {notifications.length === 0 && (
+          <div className="carte" style={{ alignItems: 'center', textAlign: 'center', padding: 30, borderStyle: 'dashed' }}>
+            <p style={{ fontWeight: 700 }}>Aucune notification</p>
+          </div>
+        )}
+        {notifications.map((n) => {
           const s = STATUTS[n.ton];
-          const lue = etat.notificationsLues.includes(n.id);
+          const lue = n.lue;
           return (
             <div key={n.id} className={`carte${lue ? ' carte--plate' : ''}`} style={{ flexDirection: 'row', gap: 13, borderColor: lue ? undefined : '#E0DBF4' }}>
               <span className="vignette" style={{ background: s.fond, color: s.texte }}><Icone nom={s.icone} taille={20} couleur={s.texte} epaisseur={2.1} /></span>
               <span style={{ display: 'flex', flexDirection: 'column', gap: 6, flexGrow: 1 }}>
                 <span className="rangee-entre">
                   <strong style={{ fontSize: '1rem' }}>{n.titre}</strong>
-                  <span style={{ fontSize: '.78rem', color: '#8B8896', whiteSpace: 'nowrap' }}>{n.quand}</span>
+                  <span style={{ fontSize: '.78rem', color: '#8B8896', whiteSpace: 'nowrap' }}>{ilYA(n.creeLe)}</span>
                 </span>
                 <span style={{ fontSize: '.92rem', color: 'var(--texte-2)' }}>{n.texte}</span>
                 <Link className="puce" href={n.lien} style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', minHeight: 44 }}>{n.action}</Link>
@@ -40,7 +49,7 @@ export function Notifications() {
           );
         })}
 
-        <button type="button" className="bouton bouton--secondaire bouton--bloc" onClick={toutLu}>
+        <button type="button" className="bouton bouton--secondaire bouton--bloc" onClick={toutLu} disabled={enCours}>
           <Icone nom="coche" taille={19} epaisseur={2.2} />Tout marquer comme lu
         </button>
 

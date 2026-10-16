@@ -1,10 +1,9 @@
 'use client';
 
 /* Ce qui touche directement au navigateur : annonces aux lecteurs d'écran,
-   notifications, invitation d'installation (PWA) et export des données. */
+   notifications et invitation d'installation (PWA). */
 
 import { useSyncExternalStore } from 'react';
-import { lire } from './store';
 
 /** Annonce un message aux lecteurs d'écran. */
 export function annoncer(message: string) {
@@ -92,15 +91,3 @@ export function dejaInstallee(): boolean {
     || Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
 }
 
-/* ------------------------------------------------------------------ */
-/* Données                                                             */
-/* ------------------------------------------------------------------ */
-
-export function exporterDonnees() {
-  const contenu = JSON.stringify(lire(), null, 2);
-  const lien = document.createElement('a');
-  lien.href = URL.createObjectURL(new Blob([contenu], { type: 'application/json' }));
-  lien.download = 'mes-donnees-lifeos.json';
-  lien.click();
-  URL.revokeObjectURL(lien.href);
-}

@@ -1,10 +1,11 @@
 /* Page d'accueil publique. Rendue sur le serveur : elle s'affiche avant même le chargement du JavaScript. */
 
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { Icone, Logo, type NomIcone } from '@/components/Icone';
 import { BadgeStatut } from '@/components/ui';
 import { BoutonInstaller } from '@/components/BoutonInstaller';
-import { RedirectionSiConnecte } from '@/components/Garde';
+import { RedirectionSiConnecte } from '@/components/serveur';
 import { LANGUES } from '@/lib/data';
 
 const ATOUT: React.CSSProperties = { gap: 8, fontSize: '.9rem', fontWeight: 600, color: 'var(--texte-2)' };
@@ -26,7 +27,9 @@ const CONFIDENTIALITE = [
 export default function Accueil() {
   return (
     <main id="contenu" className="ecran ecran--large" tabIndex={-1}>
-      <RedirectionSiConnecte />
+      <Suspense>
+        <RedirectionSiConnecte />
+      </Suspense>
       <div className="landing">
         <header className="entete-site">
           <Link className="marque" href="/"><Logo taille={34} /><span>LifeOS</span></Link>

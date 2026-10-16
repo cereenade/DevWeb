@@ -4,24 +4,28 @@ import Link from 'next/link';
 import { Icone } from '@/components/Icone';
 import { CarteDocument } from '@/components/ui';
 import { BoutonInstaller } from '@/components/BoutonInstaller';
-import { DOCUMENTS, NOTIFICATIONS, STATUTS, UTILISATEUR } from '@/lib/data';
+import { STATUTS, type DocumentAdmin, type Utilisateur } from '@/lib/data';
 import { delaiCourt } from '@/lib/format';
-import { demarcheTerminee, ecrire, progression, useEtatCharge } from '@/lib/store';
+import { demarcheTerminee, progression } from '@/lib/demarches';
+import { masquerInstallation } from '@/serveur/actions/preferences';
 import { useInstallable } from '@/lib/navigateur';
 
-export function TableauDeBord() {
-  const etat = useEtatCharge();
-  const prenom = etat.compte?.prenom || UTILISATEUR.prenom;
-  const aFaire = DOCUMENTS.filter((d) => d.echeance && !demarcheTerminee(etat, d));
-  const rien = DOCUMENTS.filter((d) => !d.echeance || demarcheTerminee(etat, d));
+interface Proprietes {
+  utilisateur: Utilisateur;
+  documents: DocumentAdmin[];
+  nonLues: number;
+}
+
+export function TableauDeBord({ utilisateur, documents, nonLues }: Proprietes) {
+  const aFaire = documents.filter((d) => d.echeance && !demarcheTerminee(d));
+  const rien = documents.filter((d) => !d.echeance || demarcheTerminee(d));
   const prochaine = aFaire.slice().sort((a, b) => a.echeance!.localeCompare(b.echeance!))[0];
-  const nonLues = NOTIFICATIONS.filter((n) => !etat.notificationsLues.includes(n.id)).length;
 
   return (
     <div className="pile">
       <div className="rangee-entre" style={{ alignItems: 'flex-start' }}>
         <div>
-          <h1 style={{ fontSize: '1.6rem' }}>Bonjour {prenom}</h1>
+          <h1 style={{ fontSize: '1.6rem' }}>Bonjour {utilisateur.prenom}</h1>
           <p style={{ color: 'var(--texte-3)' }}>Voici ce qui nécessite votre attention.</p>
         </div>
         <Link className="bouton-icone" href="/notifications" aria-label={`Centre de notifications${nonLues ? `, ${nonLues} non lues` : ''}`} style={{ position: 'relative' }}>
@@ -40,7 +44,7 @@ export function TableauDeBord() {
         </span>
       </Link>
 
-      <BandeauInstallation masque={etat.installMasque} />
+      <BandeauInstallation masque={utilisateur.installMasque} />
 
       <div className="rangee-entre">
         <h2 style={{ fontSize: '1.12rem' }}>À faire</h2>
@@ -48,7 +52,7 @@ export function TableauDeBord() {
       </div>
 
       {aFaire.length
-        ? aFaire.map((d) => <CarteDocument key={d.id} doc={d} part={progression(etat, d)} />)
+        ? aFaire.map((d) => <CarteDocument key={d.slug} doc={d} part={progression(d)} />)
         : (
           <div className="carte" style={{ alignItems: 'center', textAlign: 'center', padding: 26 }}>
             <Icone nom="coche" taille={34} couleur="#2F7D57" epaisseur={2.2} />
@@ -60,10 +64,10 @@ export function TableauDeBord() {
       {rien.map((d) => {
         const s = STATUTS[d.statut];
         return (
-          <div key={d.id} className="carte carte--plate" style={{ flexDirection: 'row', alignItems: 'center', gap: 13 }}>
+          <div key={d.slug} className="carte carte--plate" style={{ flexDirection: 'row', alignItems: 'center', gap: 13 }}>
             <span className="vignette" style={{ background: s.fond, color: s.texte }}><Icone nom={s.icone} taille={20} couleur={s.texte} epaisseur={2.2} /></span>
             <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Link href={`/document/${d.id}`} style={{ fontWeight: 700, color: 'var(--anthracite)' }}>{d.organisme}</Link>
+              <Link href={`/document/${d.slug}`} style={{ fontWeight: 700, color: 'var(--anthracite)' }}>{d.organisme}</Link>
               <span className="carte-detail">{d.statut === 'termine' ? 'Aucune action nécessaire' : d.objet}</span>
             </span>
           </div>
@@ -92,7 +96,7 @@ function BandeauInstallation({ masque }: { masque: boolean }) {
         <span style={{ fontSize: '.86rem', color: 'var(--texte-2)' }}>Ouvrez l&apos;application depuis votre écran d&apos;accueil.</span>
       </span>
       <BoutonInstaller className="puce">Installer</BoutonInstaller>
-      <button type="button" className="bouton-icone" onClick={() => ecrire({ installMasque: true })} aria-label="Masquer la proposition d'installation">
+      <button type="button" className="bouton-icone" onClick={() => masquerInstallation()} aria-label="Masquer la proposition d'installation">
         <Icone nom="chevron" taille={18} />
       </button>
     </div>

@@ -60,3 +60,12 @@ export function jaugeEcheance(iso: string | null): number {
   const part = Math.min(Math.max(1 - jours / 30, 0), 1);
   return Math.round(part * 100);
 }
+
+/** « Aujourd’hui », « Hier », « Il y a 3 jours » */
+export function ilYA(date: Date): string {
+  const debut = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const jours = Math.round((debut(new Date()) - debut(date)) / 86400000);
+  if (jours <= 0) return 'Aujourd’hui';
+  if (jours === 1) return 'Hier';
+  return `Il y a ${jours} jours`;
+}

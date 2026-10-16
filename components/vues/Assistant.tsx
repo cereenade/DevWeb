@@ -24,7 +24,7 @@ export function Assistant({ doc }: { doc: DocumentAdmin }) {
 
   return (
     <>
-      <EnteteEcran titre="Assistant LifeOS" retour={`/document/${doc.id}`} />
+      <EnteteEcran titre="Assistant LifeOS" retour={`/document/${doc.slug}`} />
       <div className="pile">
         <div className="carte carte--lavande" style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: '12px 14px' }}>
           <Icone nom="fichier" taille={18} couleur="#5A48B8" />

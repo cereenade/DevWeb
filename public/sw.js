@@ -2,22 +2,22 @@
    Objectif : l'application s'ouvre et reste lisible même sans connexion.
    Il n'est enregistré qu'en production (voir components/Demarrage.tsx). */
 
-const VERSION = 'lifeos-v2';
+const VERSION = 'lifeos-v3';
 const CACHE_COQUILLE = `${VERSION}-coquille`;
 const CACHE_EXTERNE = `${VERSION}-externe`;
 
-/* Pages indispensables au démarrage ; les fichiers /_next/static/ sont mis en cache au fil de l'eau. */
+/* Pages publiques indispensables au démarrage. Les pages du compte et les fichiers
+   /_next/static/ sont mis en cache au fil des visites. */
 const COQUILLE = [
   '/',
   '/connexion',
-  '/tableau-de-bord',
   '/manifest.webmanifest',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
 ];
 
-/* Page de repli quand une adresse n'a jamais été visitée hors connexion. */
-const REPLI = '/tableau-de-bord';
+/* Pages de repli quand une adresse n'a jamais été visitée hors connexion. */
+const REPLIS = ['/tableau-de-bord', '/'];
 
 self.addEventListener('install', (evenement) => {
   evenement.waitUntil(
@@ -52,12 +52,19 @@ self.addEventListener('fetch', (evenement) => {
           caches.open(CACHE_COQUILLE).then((cache) => cache.put(requete, copie));
           return reponse;
         })
-        .catch(async () => (await caches.match(requete)) || caches.match(REPLI))
+        .catch(async () => {
+          for (const adresse of [requete, ...REPLIS]) {
+            const enCache = await caches.match(adresse);
+            if (enCache) return enCache;
+          }
+          return Response.error();
+        })
     );
     return;
   }
 
-  if (url.origin !== self.location.origin) return;
+  /* Les données personnelles exportées (API) ne sont jamais mises en cache. */
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
 
   /* Fichiers versionnés par Next.js (leur nom change à chaque build) : cache d'abord. */
   if (url.pathname.startsWith('/_next/static/') || url.pathname.startsWith('/icons/')) {

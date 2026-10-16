@@ -3,14 +3,13 @@
 import Link from 'next/link';
 import { useState, type CSSProperties } from 'react';
 import { BadgeStatut, EnteteEcran } from '@/components/ui';
-import { DOCUMENTS, STATUTS, type DocumentAdmin } from '@/lib/data';
+import { STATUTS, type DocumentAdmin } from '@/lib/data';
 import { dateCourte, jourEtMois } from '@/lib/format';
-import { demarcheTerminee, useEtatCharge, type Etat } from '@/lib/store';
+import { demarcheTerminee } from '@/lib/demarches';
 
-export function Echeances() {
-  const etat = useEtatCharge();
+export function Echeances({ documents }: { documents: DocumentAdmin[] }) {
   const [vue, setVue] = useState<'liste' | 'calendrier'>('liste');
-  const avecDate = DOCUMENTS.filter((d) => d.echeance).sort((a, b) => a.echeance!.localeCompare(b.echeance!));
+  const avecDate = documents.filter((d) => d.echeance).sort((a, b) => a.echeance!.localeCompare(b.echeance!));
 
   const parMois: Record<string, DocumentAdmin[]> = {};
   avecDate.forEach((d) => {
@@ -33,11 +32,11 @@ export function Echeances() {
             <div key={mois} className="pile-s">
               <h2 className="titre-section">{mois}</h2>
               {parMois[mois].map((d) => {
-                const cle = demarcheTerminee(etat, d) ? 'termine' : d.statut;
+                const cle = demarcheTerminee(d) ? 'termine' : d.statut;
                 const s = STATUTS[cle];
                 const { jour, mois: court } = jourEtMois(d.echeance!);
                 return (
-                  <Link key={d.id} className="carte" href={`/document/${d.id}`} style={{ flexDirection: 'row', gap: 14 }}>
+                  <Link key={d.slug} className="carte" href={`/document/${d.slug}`} style={{ flexDirection: 'row', gap: 14 }}>
                     <span className="vignette vignette--haute" style={{ flexDirection: 'column', background: s.fond, color: s.texte }}>
                       <span style={{ fontSize: '1.3rem', fontWeight: 700 }}>{jour}</span>
                       <span style={{ fontSize: '.66rem', fontWeight: 800, letterSpacing: '.04em' }}>{court}</span>
@@ -54,7 +53,7 @@ export function Echeances() {
           ))}
         </div>
       ) : (
-        <Calendrier documents={avecDate} etat={etat} />
+        <Calendrier documents={avecDate} />
       )}
     </>
   );
@@ -62,7 +61,7 @@ export function Echeances() {
 
 const CASE: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', height: 40, borderRadius: 12, fontSize: '.9rem', fontWeight: 600 };
 
-function Calendrier({ documents, etat }: { documents: DocumentAdmin[]; etat: Etat }) {
+function Calendrier({ documents }: { documents: DocumentAdmin[] }) {
   const aujourdhui = new Date();
   const annee = aujourdhui.getFullYear();
   const mois = aujourdhui.getMonth();
@@ -77,7 +76,7 @@ function Calendrier({ documents, etat }: { documents: DocumentAdmin[]; etat: Eta
     if (date.getFullYear() === annee && date.getMonth() === mois) reperes[date.getDate()] = d;
   });
 
-  const couleurDe = (d: DocumentAdmin) => STATUTS[demarcheTerminee(etat, d) ? 'termine' : d.statut].couleur;
+  const couleurDe = (d: DocumentAdmin) => STATUTS[demarcheTerminee(d) ? 'termine' : d.statut].couleur;
 
   const cases = [];
   for (let i = 0; i < decalage; i++) cases.push(<span key={`vide-${i}`} />);
@@ -85,7 +84,7 @@ function Calendrier({ documents, etat }: { documents: DocumentAdmin[]; etat: Eta
     const doc = reperes[j];
     if (doc) {
       cases.push(
-        <Link key={j} href={`/document/${doc.id}`} aria-label={`${dateCourte(doc.echeance)} : ${doc.demarche}`}
+        <Link key={j} href={`/document/${doc.slug}`} aria-label={`${dateCourte(doc.echeance)} : ${doc.demarche}`}
           style={{ ...CASE, width: '100%', fontWeight: 800, background: couleurDe(doc), color: '#fff' }}>{j}</Link>
       );
     } else {
@@ -110,7 +109,7 @@ function Calendrier({ documents, etat }: { documents: DocumentAdmin[]; etat: Eta
       </div>
       <div className="pile-s" style={{ paddingTop: 6 }}>
         {documents.map((d) => (
-          <span key={d.id} className="rangee" style={{ gap: 9, fontSize: '.86rem', color: 'var(--texte-2)' }}>
+          <span key={d.slug} className="rangee" style={{ gap: 9, fontSize: '.86rem', color: 'var(--texte-2)' }}>
             <span style={{ display: 'block', width: 10, height: 10, borderRadius: 99, background: couleurDe(d) }} />
             {dateCourte(d.echeance)} — {d.organisme} : {d.demarche}
           </span>
