@@ -501,14 +501,8 @@ input::placeholder { color: #8B8896; }
   font-size: .72rem;
   font-weight: 800;
 }
+/* Seul l'onglet de la page affichée est mis en avant, en violet clair. */
 .barre-onglets a[aria-current="page"] { background: var(--lavande-clair); color: var(--lavande-lien); }
-.barre-onglets .onglet-analyser {
-  width: 84px;
-  background: var(--lavande);
-  color: #fff;
-  box-shadow: 0 6px 14px rgba(106, 87, 204, .3);
-}
-.barre-onglets .onglet-analyser[aria-current="page"] { background: var(--lavande-fonce); color: #fff; }
 
 /* ---------- Bandeaux ---------- */
 
@@ -705,7 +699,6 @@ body.lecture-facile .etape { line-height: 1.75; }
     font-weight: 600;
   }
   .barre-onglets a[aria-current="page"] { font-weight: 700; }
-  .barre-onglets .onglet-analyser { width: 100%; }
   .ecran--large { max-width: 1160px; }
   .duo { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
 }

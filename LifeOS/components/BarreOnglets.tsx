@@ -19,7 +19,7 @@ export function BarreOnglets() {
       {ONGLETS.map((o) => {
         const actif = chemin === o.chemin || (o.chemin === '/documents' && chemin.startsWith('/document/'));
         return (
-          <Link key={o.chemin} href={o.chemin} className={actif ? 'onglet-actif' : ''} aria-current={actif ? 'page' : undefined}>
+          <Link key={o.chemin} href={o.chemin} aria-current={actif ? 'page' : undefined}>
             <Icone nom={o.icone} taille={22} />
             {o.nom}
           </Link>
